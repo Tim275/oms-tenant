@@ -1,0 +1,49 @@
+# ServiceMonitors for OMS Application
+# Enables Prometheus to scrape metrics from application services
+# Platform responsibility: Prometheus Operator must be installed
+
+---
+# Orders ServiceMonitor - Has metrics port 9001
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: orders-metrics
+  namespace: oms
+  labels:
+    app: orders
+    component: backend-service
+    app.kubernetes.io/name: orders
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: orders
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scheme: http
+
+---
+# Gateway ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway-metrics
+  namespace: oms
+  labels:
+    app: gateway
+    component: api-gateway
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: gateway
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scheme: http

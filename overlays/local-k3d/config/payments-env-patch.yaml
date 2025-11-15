@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+  namespace: oms
+spec:
+  template:
+    spec:
+      containers:
+      - name: payments
+        env:
+        - name: GATEWAY_BASE_URL
+          value: "http://localhost:8080"

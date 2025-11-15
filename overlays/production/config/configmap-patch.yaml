@@ -1,0 +1,52 @@
+# ConfigMap patch for production environment (Talos Cluster)
+# Uses EXTERNAL managed services (RDS, managed MongoDB, etc.)
+# NO internal infrastructure deployed
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+data:
+  # External Database Connection
+  # TODO: Replace with actual RDS/managed PostgreSQL endpoint
+  POSTGRES_HOST: "postgresql.database.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "stock"
+  POSTGRES_DB: "stock"
+  # Password from secret
+  POSTGRES_URI: "postgresql://stock:POSTGRES_PASSWORD_FROM_SECRET@postgresql.database.svc.cluster.local:5432/stock?sslmode=require"
+
+  # External MongoDB
+  # TODO: Replace with actual managed MongoDB endpoint (e.g., Atlas, DocumentDB)
+  MONGO_URI: "mongodb://mongodb.database.svc.cluster.local:27017/orders?replicaSet=rs0&readPreference=primary&ssl=true"
+
+  # External RabbitMQ
+  # TODO: Replace with actual managed RabbitMQ endpoint (e.g., CloudAMQP)
+  AMQP_USER: "production-user"
+  AMQP_HOST: "rabbitmq.messaging.svc.cluster.local"
+  AMQP_PORT: "5672"
+  RABBITMQ_USER: "production-user"
+  RABBITMQ_HOST: "rabbitmq.messaging.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  # Password from secret
+  RABBITMQ_URL: "amqps://production-user:RABBITMQ_PASSWORD_FROM_SECRET@rabbitmq.messaging.svc.cluster.local:5671/"
+
+  # External Redis
+  # TODO: Replace with actual managed Redis endpoint (e.g., ElastiCache, Redis Cloud)
+  REDIS_ADDR: "redis.cache.svc.cluster.local:6379"
+
+  # Service Discovery - External Consul (optional)
+  CONSUL_ADDR: "consul.consul.svc.cluster.local:8500"
+
+  # Service Endpoints - Production namespace
+  ORDERS_GRPC_ADDR: "orders.oms-prod.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms-prod.svc.cluster.local:9003"
+
+  # Observability - External OTEL Collector
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
+
+  # Stripe Keys - Production (should come from SealedSecrets)
+  # These are placeholders - actual values from secrets
+  STRIPE_KEY: "STRIPE_PROD_KEY_FROM_SECRET"
+  STRIPE_WEBHOOK_SECRET: "STRIPE_PROD_WEBHOOK_SECRET_FROM_SECRET"

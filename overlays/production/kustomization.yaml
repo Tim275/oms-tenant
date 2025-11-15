@@ -1,0 +1,62 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Production environment for Talos Cluster
+namespace: oms
+
+resources:
+- ../../base
+
+# Production replicas - Gateway gets 3, all others get 1
+replicas:
+- name: gateway
+  count: 3
+- name: orders
+  count: 1
+- name: payments
+  count: 1
+- name: stock
+  count: 1
+- name: kitchen
+  count: 1
+- name: customer-app
+  count: 1
+- name: kitchen-display
+  count: 1
+
+# Production images with version tags
+images:
+- name: oms-gateway
+  newName: ghcr.io/tim275/oms-gateway
+  newTag: v1.0.0
+- name: oms-orders
+  newName: ghcr.io/tim275/oms-orders
+  newTag: v1.0.0
+- name: oms-payments
+  newName: ghcr.io/tim275/oms-payments
+  newTag: v1.0.0
+- name: oms-stock
+  newName: ghcr.io/tim275/oms-stock
+  newTag: v1.0.0
+- name: oms-kitchen
+  newName: ghcr.io/tim275/oms-kitchen
+  newTag: v1.0.0
+- name: oms-customer-app
+  newName: ghcr.io/tim275/oms-customer-app
+  newTag: v1.0.0
+- name: oms-kitchen-display
+  newName: ghcr.io/tim275/oms-kitchen-display
+  newTag: v1.0.0
+
+# Configuration patches
+patches:
+- path: config/configmap-patch.yaml
+  target:
+    kind: ConfigMap
+    name: oms-config
+
+commonLabels:
+  environment: production
+
+commonAnnotations:
+  deployment.kubernetes.io/environment: "production"

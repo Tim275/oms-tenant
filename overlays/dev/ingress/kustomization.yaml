@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ingress/HTTPRoutes configuration for dev
+# Using JSON patches to modify hostnames for dev environment
+
+patches:
+- target:
+    kind: HTTPRoute
+    name: customer-app
+  patch: |-
+    - op: replace
+      path: /spec/hostnames
+      value: ["oms-dev.timourhomelab.org"]
+- target:
+    kind: HTTPRoute
+    name: gateway-api
+  patch: |-
+    - op: replace
+      path: /spec/hostnames
+      value: ["api-dev.oms.timourhomelab.org"]
+- target:
+    kind: HTTPRoute
+    name: kitchen-display
+  patch: |-
+    - op: replace
+      path: /spec/hostnames
+      value: ["kitchen-dev.oms.timourhomelab.org"]
