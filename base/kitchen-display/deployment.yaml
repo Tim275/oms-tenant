@@ -32,7 +32,7 @@ spec:
         emptyDir: {}
       containers:
       - name: kitchen-display
-        image: oms-kitchen-display:latest
+        image: ghcr.io/tim275/oms-kitchen-display:v1.0.0
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

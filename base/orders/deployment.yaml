@@ -27,7 +27,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: orders
-        image: oms-orders:latest
+        image: ghcr.io/tim275/oms-orders:v1.0.0
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

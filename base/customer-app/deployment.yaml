@@ -32,7 +32,7 @@ spec:
         emptyDir: {}
       containers:
       - name: customer-app
-        image: oms-customer-app:latest
+        image: ghcr.io/tim275/oms-customer-app:v1.0.0
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
