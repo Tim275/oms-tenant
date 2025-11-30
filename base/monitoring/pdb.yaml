@@ -1,9 +1,4 @@
-# PodDisruptionBudgets for OMS Application
-# Ensures high availability during voluntary disruptions
-# Platform responsibility: Respect PDBs during cluster maintenance
-
 ---
-# Gateway PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -19,9 +14,7 @@ spec:
   selector:
     matchLabels:
       app: gateway
-
 ---
-# Orders PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -37,9 +30,7 @@ spec:
   selector:
     matchLabels:
       app: orders
-
 ---
-# Payments PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -55,9 +46,7 @@ spec:
   selector:
     matchLabels:
       app: payments
-
 ---
-# Stock PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -73,9 +62,7 @@ spec:
   selector:
     matchLabels:
       app: stock
-
 ---
-# Customer App PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -91,9 +78,7 @@ spec:
   selector:
     matchLabels:
       app: customer-app
-
 ---
-# Kitchen Display PDB
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:

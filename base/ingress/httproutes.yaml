@@ -36,7 +36,6 @@ spec:
   hostnames:
   - "oms-api.timourhomelab.org"
   rules:
-  # Stripe webhook route - must be before catch-all
   - matches:
     - path:
         type: Exact
@@ -44,7 +43,6 @@ spec:
     backendRefs:
     - name: payments
       port: 8082
-  # All other API routes go to gateway
   - matches:
     - path:
         type: PathPrefix

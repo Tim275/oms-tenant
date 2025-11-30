@@ -8,18 +8,11 @@ metadata:
     app.kubernetes.io/part-of: oms
     app.kubernetes.io/managed-by: kustomize
 data:
-  # Service Discovery
-  # CONSUL DISABLED - Using Kubernetes DNS instead
-  # CONSUL_ADDR: "consul.oms.svc.cluster.local:8500"
-
-  # Database Connection (passwords come from secrets)
   MONGO_URI: "mongodb://mongodb.oms.svc.cluster.local:27017/orders"
   POSTGRES_HOST: "postgres.oms.svc.cluster.local"
   POSTGRES_PORT: "5432"
   POSTGRES_USER: "stock"
   POSTGRES_DB: "stock"
-
-  # RabbitMQ Connection (password comes from secrets)
   AMQP_USER: "guest"
   AMQP_PASS: "guest"
   AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
@@ -27,20 +20,11 @@ data:
   RABBITMQ_USER: "guest"
   RABBITMQ_HOST: "rabbitmq.oms.svc.cluster.local"
   RABBITMQ_PORT: "5672"
-
-  # Redis
+  RABBITMQ_PASS: "guest"
   REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
-
-  # Full Connection Strings (for services that need them)
   RABBITMQ_URL: "amqp://guest:guest@rabbitmq.oms.svc.cluster.local:5672/"
   POSTGRES_URI: "postgresql://stock:stock123@postgres.oms.svc.cluster.local:5432/stock?sslmode=disable"
-
-  # Observability - OTEL Collector
-  # For k3d local: Use oms namespace (requires otel-collector deployment in oms)
-  # For homelab: Use opentelemetry namespace (platform-managed)
   OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"
-
-  # Service Endpoints
   ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
   STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
   CONSUL_ADDR: "consul.oms.svc.cluster.local:8500"

@@ -9,7 +9,6 @@ metadata:
     app.kubernetes.io/component: namespace
     app.kubernetes.io/part-of: oms
     app.kubernetes.io/managed-by: kustomize
-    # Pod Security Standards (Kubernetes 1.23+)
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted

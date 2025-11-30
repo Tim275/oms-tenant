@@ -25,16 +25,21 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: kitchen
         image: ghcr.io/tim275/oms-kitchen:v1.0.0
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
+          privileged: false
           readOnlyRootFilesystem: true
           capabilities:
             drop:
             - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
         - containerPort: 8083
           name: http

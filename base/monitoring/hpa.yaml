@@ -1,9 +1,4 @@
-# HorizontalPodAutoscalers for OMS Application
-# Auto-scales pods based on CPU and Memory utilization
-# Platform responsibility: Metrics Server must be installed
-
 ---
-# Gateway HPA - Handles all HTTP traffic, scales aggressively
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -51,9 +46,7 @@ spec:
         value: 2
         periodSeconds: 30
       selectPolicy: Max
-
 ---
-# Orders HPA - gRPC service, moderate scaling
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -97,9 +90,7 @@ spec:
       - type: Pods
         value: 1
         periodSeconds: 30
-
 ---
-# Payments HPA - Critical service, conservative scaling
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -143,9 +134,7 @@ spec:
       - type: Pods
         value: 1
         periodSeconds: 60
-
 ---
-# Stock HPA - Inventory management, moderate scaling
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

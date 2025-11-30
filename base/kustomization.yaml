@@ -4,17 +4,8 @@ kind: Kustomization
 namespace: oms
 
 resources:
-# NOTE: Namespace is provided by Platform Team (PaaS Model)
-# See: talos-homelab/kubernetes/platform/governance/tenants/oms/namespace.yaml
-# DO NOT add namespace.yaml here - it causes SharedResourceWarning!
-
-# Shared Configuration
 - configmap.yaml
-
-# Secrets (Sealed Secrets)
 - secrets/
-
-# Services
 - gateway/
 - orders/
 - payments/
@@ -22,11 +13,7 @@ resources:
 - kitchen/
 - customer-app/
 - kitchen-display/
-
-# Ingress/Gateway
 - ingress/
-
-# Monitoring & Autoscaling
 - monitoring/
 
 commonLabels:

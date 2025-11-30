@@ -25,16 +25,21 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: orders
         image: ghcr.io/tim275/oms-orders:v1.0.0
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
+          privileged: false
           readOnlyRootFilesystem: true
           capabilities:
             drop:
             - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
         - containerPort: 9000
           name: grpc

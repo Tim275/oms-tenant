@@ -1,14 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Dev environment for Pi Cluster
 namespace: oms
 
 resources:
 - ../../base
 - infrastructure
 
-# Dev replicas - all services get 1 replica
 replicas:
 - name: gateway
   count: 1
@@ -25,7 +23,6 @@ replicas:
 - name: kitchen-display
   count: 1
 
-# Dev image tags
 images:
 - name: oms-gateway
   newTag: latest
@@ -42,14 +39,11 @@ images:
 - name: oms-kitchen-display
   newTag: latest
 
-# Configuration patches
 patches:
 - path: config/configmap-patch.yaml
   target:
     kind: ConfigMap
     name: oms-config
-
-# HTTPRoute patches for dev environment
 - target:
     kind: HTTPRoute
     name: customer-app

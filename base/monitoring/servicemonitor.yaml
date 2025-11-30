@@ -1,9 +1,4 @@
-# ServiceMonitors for OMS Application
-# Enables Prometheus to scrape metrics from application services
-# Platform responsibility: Prometheus Operator must be installed
-
 ---
-# Orders ServiceMonitor - Has metrics port 9001
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -24,9 +19,7 @@ spec:
     path: /metrics
     interval: 30s
     scheme: http
-
 ---
-# Gateway ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -47,9 +40,7 @@ spec:
     path: /metrics
     interval: 30s
     scheme: http
-
 ---
-# Payments ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -70,9 +61,7 @@ spec:
     path: /metrics
     interval: 30s
     scheme: http
-
 ---
-# Stock ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -93,9 +82,7 @@ spec:
     path: /metrics
     interval: 30s
     scheme: http
-
 ---
-# Kitchen ServiceMonitor
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

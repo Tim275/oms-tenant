@@ -1,13 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Production environment for Talos Cluster
 namespace: oms
 
 resources:
 - ../../base
+- ../../platform/production
 
-# Production replicas - Gateway gets 3, all others get 1
 replicas:
 - name: gateway
   count: 3
@@ -24,76 +23,11 @@ replicas:
 - name: kitchen-display
   count: 1
 
-# NOTE: Images are already specified in base deployments with full ghcr.io references
-# No images transformer needed - base has ghcr.io/tim275/oms-*:v1.0.x
-
-# Configuration patches
 patches:
 - path: config/configmap-patch.yaml
   target:
     kind: ConfigMap
     name: oms-config
-
-# Security Context Patches for PodSecurity "restricted"
-# Pod-level security context (strategic merge patch)
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: gateway
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: orders
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: payments
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: stock
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: kitchen
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: customer-app
-- path: security-context-patch.yaml
-  target:
-    kind: Deployment
-    name: kitchen-display
-
-# Container-level security context (JSON patch to target first container by index)
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: gateway
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: orders
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: payments
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: stock
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: kitchen
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: customer-app
-- path: container-security-patch.json
-  target:
-    kind: Deployment
-    name: kitchen-display
 
 commonLabels:
   environment: production

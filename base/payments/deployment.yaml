@@ -25,16 +25,21 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: payments
         image: ghcr.io/tim275/oms-payments:v1.0.0
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
+          privileged: false
           readOnlyRootFilesystem: true
           capabilities:
             drop:
             - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
         - containerPort: 8082
           name: http

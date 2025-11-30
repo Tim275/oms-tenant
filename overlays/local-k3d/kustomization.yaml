@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Local k3d environment for development
 namespace: oms
 
 resources:
@@ -12,7 +11,6 @@ resources:
 - monitoring
 - dev-tools
 
-# Local k3d replicas - all services get 1 replica
 replicas:
 - name: gateway
   count: 1
@@ -29,7 +27,6 @@ replicas:
 - name: kitchen-display
   count: 1
 
-# Local k3d image tags
 images:
 - name: oms-gateway
   newTag: latest
@@ -46,7 +43,6 @@ images:
 - name: oms-kitchen-display
   newTag: latest
 
-# Configuration patches
 patches:
 - path: config/configmap-patch.yaml
   target: {kind: ConfigMap, name: oms-config}

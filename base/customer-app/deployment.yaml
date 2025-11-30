@@ -23,8 +23,10 @@ spec:
       serviceAccountName: customer-app
       securityContext:
         runAsNonRoot: true
-        runAsUser: 101  # nginx user
+        runAsUser: 101
         fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       volumes:
       - name: nginx-cache
         emptyDir: {}
@@ -36,10 +38,13 @@ spec:
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
+          privileged: false
           readOnlyRootFilesystem: true
           capabilities:
             drop:
             - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
         - containerPort: 80
           name: http
