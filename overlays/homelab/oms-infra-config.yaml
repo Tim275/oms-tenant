@@ -1,0 +1,54 @@
+# Platform-provided ConfigMap for OMS Infrastructure
+# This ConfigMap is typically created by the Platform Team
+# Contains connection details for managed infrastructure services
+#
+# IMPORTANT: MongoDB credentials use Percona Operator's databaseAdmin user
+# Secret: internal-mongodb-oms-users
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-infra-config
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: oms-infra-config
+    app.kubernetes.io/part-of: oms
+    platform.homelab/managed-by: platform-team
+data:
+  # MongoDB - Percona Operator ReplicaSet with Authentication
+  MONGO_URI: "mongodb://databaseAdmin:databaseAdmin123456@mongodb-oms-rs0-0.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-1.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-2.mongodb-oms-rs0.oms.svc.cluster.local:27017/orders?replicaSet=rs0&authSource=admin"
+
+  # PostgreSQL - Platform managed StatefulSet
+  POSTGRES_HOST: "postgres.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "stock"
+  POSTGRES_DB: "stock"
+  POSTGRES_URI: "postgresql://stock:stock123@postgres.oms.svc.cluster.local:5432/stock?sslmode=disable"
+
+  # RabbitMQ - Platform managed
+  AMQP_USER: "guest"
+  AMQP_PASS: "guest"
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+  RABBITMQ_USER: "guest"
+  RABBITMQ_PASS: "guest"
+  RABBITMQ_HOST: "rabbitmq.oms.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.oms.svc.cluster.local:5672/"
+
+  # Redis - Platform managed
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # Consul - Disabled for Kubernetes (using native K8s DNS service discovery)
+  CONSUL_ADDR: ""
+
+  # Service Endpoints
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Observability - OTEL Collector (in opentelemetry namespace)
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"
+
+  # Gateway Public URL - for Stripe success/cancel redirects
+  # IMPORTANT: Must point to oms-api (where gateway service is), NOT oms (customer-app)
+  GATEWAY_PUBLIC_URL: "https://oms-api.timourhomelab.org"

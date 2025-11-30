@@ -1,0 +1,45 @@
+# ConfigMap patch for development environment (Pi Cluster)
+# Uses internal infrastructure services deployed in oms namespace
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+data:
+  # Database Connection - Dev internal services
+  MONGO_URI: "mongodb://mongodb.oms.svc.cluster.local:27017/orders"
+  POSTGRES_HOST: "postgres.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "stock"
+  POSTGRES_DB: "stock"
+  POSTGRES_PASSWORD: "stock123"
+  POSTGRES_URI: "postgresql://stock:stock123@postgres.oms.svc.cluster.local:5432/stock?sslmode=disable"
+
+  # RabbitMQ Connection - Dev internal services
+  AMQP_USER: "guest"
+  AMQP_PASS: "guest"
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+  RABBITMQ_USER: "guest"
+  RABBITMQ_PASS: "guest"
+  RABBITMQ_HOST: "rabbitmq.oms.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.oms.svc.cluster.local:5672/"
+
+  # Redis - Dev internal service
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # Service Discovery - Using Kubernetes DNS (no Consul in dev)
+  # CONSUL_ADDR: ""  # Not used in dev
+
+  # Service Endpoints - Dev namespace
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Observability - Optional in dev
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+
+  # Stripe Keys - Development mode (placeholder - should be updated with real dev keys)
+  STRIPE_KEY: "STRIPE_DEV_KEY_PLACEHOLDER"
+  STRIPE_WEBHOOK_SECRET: "STRIPE_DEV_WEBHOOK_SECRET_PLACEHOLDER"

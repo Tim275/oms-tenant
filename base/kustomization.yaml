@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: oms
+
+resources:
+# NOTE: Namespace is provided by Platform Team (PaaS Model)
+# See: talos-homelab/kubernetes/platform/governance/tenants/oms/namespace.yaml
+# DO NOT add namespace.yaml here - it causes SharedResourceWarning!
+
+# Shared Configuration
+- configmap.yaml
+
+# Secrets (Sealed Secrets)
+- secrets/
+
+# Services
+- gateway/
+- orders/
+- payments/
+- stock/
+- kitchen/
+- customer-app/
+- kitchen-display/
+
+# Ingress/Gateway
+- ingress/
+
+# Monitoring & Autoscaling
+- monitoring/
+
+commonLabels:
+  app.kubernetes.io/part-of: oms
+  app.kubernetes.io/managed-by: kustomize
+
+commonAnnotations:
+  app.kubernetes.io/version: "1.0.0"

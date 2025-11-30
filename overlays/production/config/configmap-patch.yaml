@@ -1,0 +1,50 @@
+# ConfigMap patch for production environment (Talos Cluster)
+# All infrastructure runs in the oms namespace (same tenant)
+# Uses RabbitMQ Cluster Operator and PSMDB Operator for HA
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+data:
+  # PostgreSQL - StatefulSet in oms namespace
+  POSTGRES_HOST: "postgres.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "stock"
+  POSTGRES_DB: "stock"
+  POSTGRES_URI: "postgresql://stock:stock123@postgres.oms.svc.cluster.local:5432/stock?sslmode=disable"
+
+  # MongoDB - Percona Operator ReplicaSet in oms namespace
+  # Credentials from internal-mongodb-oms-users secret (databaseAdmin user)
+  MONGO_URI: "mongodb://databaseAdmin:databaseAdmin123456@mongodb-oms-rs0-0.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-1.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-2.mongodb-oms-rs0.oms.svc.cluster.local:27017/orders?replicaSet=rs0&authSource=admin"
+
+  # RabbitMQ - RabbitMQ Cluster Operator in oms namespace
+  AMQP_USER: "guest"
+  AMQP_PASS: "guest"
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+  RABBITMQ_USER: "guest"
+  RABBITMQ_PASS: "guest"
+  RABBITMQ_HOST: "rabbitmq.oms.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq.oms.svc.cluster.local:5672/"
+
+  # Redis - StatefulSet in oms namespace
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # Consul DISABLED - Using Kubernetes DNS
+  CONSUL_ADDR: ""
+  CONSUL_ENABLED: "false"
+
+  # Service Endpoints - oms namespace (NOT oms-prod!)
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Observability - OTEL Collector in opentelemetry namespace
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"
+
+  # Stripe Keys - Production (should come from SealedSecrets)
+  # These are placeholders - actual values from secrets
+  STRIPE_KEY: "STRIPE_PROD_KEY_FROM_SECRET"
+  STRIPE_WEBHOOK_SECRET: "STRIPE_PROD_WEBHOOK_SECRET_FROM_SECRET"
