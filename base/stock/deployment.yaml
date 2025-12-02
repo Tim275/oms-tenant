@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/part-of: oms
     app.kubernetes.io/component: backend-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: stock
