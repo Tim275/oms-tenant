@@ -30,7 +30,7 @@ spec:
       containers:
       - name: stock
         image: ghcr.io/tim275/oms-stock:v1.0.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
