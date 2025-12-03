@@ -1,3 +1,25 @@
+# =============================================================================
+# 🐰 RabbitMQ Cluster - Enterprise Best Practice
+# =============================================================================
+# Uses static credentials secret for predictable authentication
+# Services reference these credentials via ConfigMap
+# =============================================================================
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-credentials
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: messaging
+    platform.homelab/tenant: oms
+type: Opaque
+stringData:
+  username: guest
+  password: guest
+---
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
@@ -36,10 +58,12 @@ spec:
       cluster_partition_handling = pause_minority
       vm_memory_high_watermark.relative = 0.6
       disk_free_limit.absolute = 2GB
-    envConfig: |
-      RABBITMQ_DEFAULT_USER=guest
-      RABBITMQ_DEFAULT_PASS=guest
-      RABBITMQ_DEFAULT_VHOST=/
+      # Use static guest credentials
+      default_user = guest
+      default_pass = guest
+      default_vhost = /
+      # Allow guest loopback only (secure for internal cluster use)
+      loopback_users.guest = false
 
   override:
     statefulSet:

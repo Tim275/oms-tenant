@@ -8,6 +8,10 @@ spec:
   image: percona/percona-server-mongodb:7.0.18-11
   imagePullPolicy: IfNotPresent
 
+  # Allow single replica for homelab (default requires 3)
+  unsafeFlags:
+    replsetSize: true
+
   secrets:
     users: mongodb-oms-secrets
 
