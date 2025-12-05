@@ -54,26 +54,27 @@ spec:
             configMapKeyRef:
               name: oms-config
               key: CONSUL_ADDR
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
         - name: AMQP_USER
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_USER
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
         - name: AMQP_PASS
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_PASS
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
         - name: AMQP_HOST
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_HOST
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
         - name: AMQP_PORT
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_PORT
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
         - name: STRIPE_SECRET_KEY
           valueFrom:
             secretKeyRef:

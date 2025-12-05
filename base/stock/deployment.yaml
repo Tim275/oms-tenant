@@ -61,66 +61,50 @@ spec:
             configMapKeyRef:
               name: oms-config
               key: CONSUL_ADDR
+        # PostgreSQL - Enterprise Pattern: CloudNativePG operator secret + service discovery
         - name: POSTGRES_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: POSTGRES_HOST
+          value: "postgres-rw.oms.svc.cluster.local"
         - name: POSTGRES_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: POSTGRES_PORT
+          value: "5432"
         - name: POSTGRES_USER
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: POSTGRES_USER
+            secretKeyRef:
+              name: postgres-app-user
+              key: username
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: database-secrets
-              key: POSTGRES_PASSWORD
+              name: postgres-app-user
+              key: password
         - name: POSTGRES_DB
-          valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: POSTGRES_DB
+          value: "stock"
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
         - name: RABBITMQ_USER
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: RABBITMQ_USER
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
         - name: RABBITMQ_PASS
           valueFrom:
             secretKeyRef:
-              name: database-secrets
-              key: RABBITMQ_DEFAULT_PASS
+              name: rabbitmq-default-user
+              key: password
         - name: RABBITMQ_HOST
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: RABBITMQ_HOST
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
         - name: RABBITMQ_PORT
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: RABBITMQ_PORT
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
         - name: REDIS_ADDR
           valueFrom:
             configMapKeyRef:
               name: oms-config
               key: REDIS_ADDR
-        - name: RABBITMQ_URL
-          valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: RABBITMQ_URL
-        - name: POSTGRES_URI
-          valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: POSTGRES_URI
+        # RABBITMQ_URL and POSTGRES_URI removed - using individual env vars from operator secrets
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           valueFrom:
             configMapKeyRef:

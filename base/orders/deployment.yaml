@@ -61,31 +61,53 @@ spec:
             configMapKeyRef:
               name: oms-config
               key: CONSUL_ADDR
-        - name: MONGO_URI
+        # MongoDB - Enterprise Pattern: Percona Operator secret + individual vars
+        - name: MONGO_HOST
           valueFrom:
             configMapKeyRef:
               name: oms-config
-              key: MONGO_URI
+              key: MONGO_HOST
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: MONGO_PORT
+        - name: MONGO_DB
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: MONGO_DB
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: internal-mongodb-oms-users
+              key: MONGODB_DATABASE_ADMIN_USER
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: internal-mongodb-oms-users
+              key: MONGODB_DATABASE_ADMIN_PASSWORD
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
         - name: AMQP_USER
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_USER
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
         - name: AMQP_PASS
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_PASS
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
         - name: AMQP_HOST
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_HOST
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
         - name: AMQP_PORT
           valueFrom:
-            configMapKeyRef:
-              name: oms-config
-              key: AMQP_PORT
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           valueFrom:
             configMapKeyRef:

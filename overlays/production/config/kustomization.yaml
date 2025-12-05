@@ -3,6 +3,9 @@ kind: Kustomization
 
 # Configuration management for production environment
 
+resources:
+- orders-mongodb-secret.yaml
+
 patches:
 - path: configmap-patch.yaml
   target:

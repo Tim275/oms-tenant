@@ -29,6 +29,7 @@ labels:
 resources:
   - ../../base
   - oms-infra-config.yaml
+  - oms-infra-secrets.yaml
 
 # ===========================================
 # PATCHES
@@ -73,8 +74,8 @@ patches:
         value:
           name: MONGO_URI
           valueFrom:
-            configMapKeyRef:
-              name: oms-infra-config
+            secretKeyRef:
+              name: oms-infra-secrets
               key: MONGO_URI
 
   # Payments - needs RabbitMQ, OTEL

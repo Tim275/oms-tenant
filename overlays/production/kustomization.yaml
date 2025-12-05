@@ -6,6 +6,7 @@ namespace: oms
 resources:
 - ../../base
 - ../../platform/production
+- config/orders-mongodb-secret.yaml
 
 replicas:
 - name: gateway
@@ -28,6 +29,10 @@ patches:
   target:
     kind: ConfigMap
     name: oms-config
+- path: config/orders-secrets-patch.yaml
+  target:
+    kind: Deployment
+    name: orders
 
 commonLabels:
   environment: production
