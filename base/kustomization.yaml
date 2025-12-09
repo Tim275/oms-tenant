@@ -5,7 +5,7 @@ namespace: oms
 
 resources:
 - configmap.yaml
-- secrets/
+- namespace.yaml
 - gateway/
 - orders/
 - payments/
