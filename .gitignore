@@ -1,7 +1,6 @@
 # Secrets and sensitive files
 *.env
 .env.*
-secrets/
 *.key
 *.pem
 credentials.json
