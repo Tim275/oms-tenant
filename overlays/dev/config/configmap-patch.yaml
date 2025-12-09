@@ -1,0 +1,40 @@
+# =============================================================================
+# ConfigMap patch for dev environment
+# =============================================================================
+# ENTERPRISE BEST PRACTICE:
+# - Credentials in dev-secrets.yaml (stringData format for readability)
+# - ConfigMap only contains NON-SENSITIVE configuration
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+data:
+  # MongoDB - Service Discovery only
+  MONGO_HOST: "mongodb.oms.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_DB: "orders"
+
+  # PostgreSQL - Service Discovery only
+  POSTGRES_HOST: "postgres.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "stock"
+
+  # RabbitMQ - Service Discovery only
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+
+  # Redis
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # gRPC Endpoints
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Consul DISABLED
+  CONSUL_ADDR: ""
+
+  # Observability - disabled in dev
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""

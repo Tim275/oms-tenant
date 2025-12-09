@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders
+  namespace: oms
+  labels:
+    app: orders
+    component: backend-service
+    app.kubernetes.io/name: orders
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders
+  template:
+    metadata:
+      labels:
+        app: orders
+        component: backend-service
+    spec:
+      serviceAccountName: orders
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: orders
+        image: ghcr.io/tim275/oms-orders:v1.0.0
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        ports:
+        - containerPort: 9000
+          name: grpc
+          protocol: TCP
+        - containerPort: 9001
+          name: metrics
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "orders"
+        - name: GRPC_ADDR
+          value: "0.0.0.0:9000"
+        - name: SERVICE_ADDR
+          value: "orders.oms.svc.cluster.local:9000"
+        - name: METRICS_ADDR
+          value: "0.0.0.0:9001"
+        - name: CONSUL_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: CONSUL_ADDR
+        # MongoDB - Enterprise Pattern: Percona Operator secret + individual vars
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: MONGO_HOST
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: MONGO_PORT
+        - name: MONGO_DB
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: MONGO_DB
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: internal-mongodb-oms-users
+              key: MONGODB_DATABASE_ADMIN_USER
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: internal-mongodb-oms-users
+              key: MONGODB_DATABASE_ADMIN_PASSWORD
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
+        - name: AMQP_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
+        - name: AMQP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
+        - name: AMQP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
+        - name: AMQP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9001
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

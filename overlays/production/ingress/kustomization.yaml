@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ingress/HTTPRoutes configuration for production
+# Using base HTTPRoutes without modifications
+
+# No additional resources or patches needed for production
+# The base HTTPRoutes already use production domains

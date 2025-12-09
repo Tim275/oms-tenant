@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+  namespace: oms
+  labels:
+    app: payments
+    component: backend-service
+    app.kubernetes.io/name: payments
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments
+  template:
+    metadata:
+      labels:
+        app: payments
+        component: backend-service
+    spec:
+      serviceAccountName: payments
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: payments
+        image: ghcr.io/tim275/oms-payments:v1.0.0
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        ports:
+        - containerPort: 8082
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "payments"
+        - name: HTTP_ADDR
+          value: "0.0.0.0:8082"
+        - name: CONSUL_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: CONSUL_ADDR
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
+        - name: AMQP_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
+        - name: AMQP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
+        - name: AMQP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
+        - name: AMQP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-secrets
+              key: STRIPE_SECRET_KEY
+        - name: STRIPE_ENDPOINT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: stripe-secrets
+              key: STRIPE_ENDPOINT_SECRET
+        - name: GATEWAY_BASE_URL
+          value: "https://oms-api.timourhomelab.org"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        - name: ORDERS_GRPC_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: ORDERS_GRPC_ADDR
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

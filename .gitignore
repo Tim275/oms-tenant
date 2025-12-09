@@ -1,0 +1,31 @@
+# Secrets and sensitive files
+*.env
+.env.*
+secrets/
+*.key
+*.pem
+credentials.json
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+
+# Kustomize build output
+kustomize-build/
+
+# Local development
+.local/
+tmp/
+
+# Scripts (belong in CI/CD)
+*.sh
+deploy.sh
+start-*.sh
+verify-*.sh

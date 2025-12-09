@@ -1,0 +1,44 @@
+# =============================================================================
+# OMS ConfigMap - NON-SENSITIVE Configuration Only
+# =============================================================================
+# ENTERPRISE PATTERN:
+# - ConfigMaps contain ONLY non-sensitive service discovery and config
+# - Credentials come from operator-generated Secrets:
+#   - rabbitmq-default-user (RabbitMQ Cluster Operator)
+#   - postgres-app-user (CloudNativePG Operator)
+#   - mongodb-oms-users (Percona MongoDB Operator)
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: oms-config
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/managed-by: kustomize
+data:
+  # Service Discovery - Hosts only, NO credentials!
+  POSTGRES_HOST: "postgres-rw.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "stock"
+
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # MongoDB - Single replica for homelab
+  MONGO_HOST: "mongodb-oms-rs0-0.mongodb-oms-rs0.oms.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_DB: "orders"
+
+  # gRPC Service Endpoints
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Observability
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"
+
+  # Consul - disabled by default (using k8s DNS)
+  CONSUL_ADDR: ""

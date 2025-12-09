@@ -1,0 +1,35 @@
+# =============================================================================
+# ConfigMap patch for production environment (Talos Cluster)
+# =============================================================================
+# ENTERPRISE BEST PRACTICE:
+# - PostgreSQL credentials come from CloudNativePG operator secret (postgres-app-user)
+# - RabbitMQ credentials come from RabbitMQ operator secret (rabbitmq-default-user)
+# - MongoDB credentials come from Percona operator secret (mongodb-oms-users)
+# - This ConfigMap only contains NON-SENSITIVE configuration
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-config
+  namespace: oms
+data:
+  # MongoDB - Percona Operator ReplicaSet (single replica for homelab)
+  # Credentials from mongodb-oms-users secret via secretKeyRef in deployment
+  MONGO_HOST: "mongodb-oms-rs0-0.mongodb-oms-rs0.oms.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_DB: "orders"
+
+  # Redis - StatefulSet in oms namespace (no auth for homelab)
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # Consul DISABLED - Using Kubernetes DNS for service discovery
+  CONSUL_ADDR: ""
+  CONSUL_ENABLED: "false"
+
+  # Service Endpoints - oms namespace
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # Observability - OTEL Collector in opentelemetry namespace
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"

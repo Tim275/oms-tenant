@@ -1,0 +1,78 @@
+# Platform-provided ConfigMap for OMS Infrastructure
+# Contains non-sensitive connection endpoints only
+#
+# SEPARATION OF CONCERNS:
+# - ConfigMap: Hosts, ports, database names (this file)
+# - Secret: Credentials (see oms-infra-secrets.yaml)
+#
+# DYNAMIC SECRETS: In production, use secretKeyRef to reference operator-created secrets:
+# - MongoDB: internal-mongodb-oms-users (Percona Operator)
+# - RabbitMQ: rabbitmq-default-user (RabbitMQ Cluster Operator)
+# - PostgreSQL: <cluster>-app (CloudNative PG Operator)
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oms-infra-config
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: oms-infra-config
+    app.kubernetes.io/part-of: oms
+    platform.homelab/managed-by: platform-team
+data:
+  # ===========================================
+  # DATABASE ENDPOINTS
+  # ===========================================
+
+  # MongoDB - Percona Operator ReplicaSet (3 replicas)
+  MONGO_HOST: "mongodb-oms-rs0.oms.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_DATABASE: "orders"
+  MONGO_REPLICA_SET: "rs0"
+  # Full connection hosts for ReplicaSet
+  MONGO_HOSTS: "mongodb-oms-rs0-0.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-1.mongodb-oms-rs0.oms.svc.cluster.local:27017,mongodb-oms-rs0-2.mongodb-oms-rs0.oms.svc.cluster.local:27017"
+
+  # PostgreSQL - Platform managed StatefulSet
+  POSTGRES_HOST: "postgres.oms.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "stock"
+
+  # Redis - Platform managed
+  REDIS_HOST: "redis.oms.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_ADDR: "redis.oms.svc.cluster.local:6379"
+
+  # ===========================================
+  # MESSAGING ENDPOINTS
+  # ===========================================
+
+  # RabbitMQ - RabbitMQ Cluster Operator
+  RABBITMQ_HOST: "rabbitmq.oms.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  AMQP_HOST: "rabbitmq.oms.svc.cluster.local"
+  AMQP_PORT: "5672"
+
+  # ===========================================
+  # SERVICE DISCOVERY
+  # ===========================================
+
+  # Consul - Disabled for Kubernetes (using native K8s DNS)
+  CONSUL_ADDR: ""
+
+  # Internal gRPC Service Endpoints
+  ORDERS_GRPC_ADDR: "orders.oms.svc.cluster.local:9000"
+  STOCK_GRPC_ADDR: "stock.oms.svc.cluster.local:9003"
+
+  # ===========================================
+  # OBSERVABILITY
+  # ===========================================
+
+  # OTEL Collector (in opentelemetry namespace)
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-collector.opentelemetry.svc.cluster.local:4317"
+
+  # ===========================================
+  # PUBLIC URLS
+  # ===========================================
+
+  # Gateway Public URL - for Stripe success/cancel redirects
+  GATEWAY_PUBLIC_URL: "https://oms-api.timourhomelab.org"

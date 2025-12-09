@@ -1,0 +1,105 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: orders-metrics
+  namespace: oms
+  labels:
+    app: orders
+    component: backend-service
+    app.kubernetes.io/name: orders
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: orders
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scheme: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway-metrics
+  namespace: oms
+  labels:
+    app: gateway
+    component: api-gateway
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: gateway
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scheme: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: payments-metrics
+  namespace: oms
+  labels:
+    app: payments
+    component: backend-service
+    app.kubernetes.io/name: payments
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: payments
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scheme: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stock-metrics
+  namespace: oms
+  labels:
+    app: stock
+    component: backend-service
+    app.kubernetes.io/name: stock
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: stock
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scheme: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kitchen-metrics
+  namespace: oms
+  labels:
+    app: kitchen
+    component: backend-service
+    app.kubernetes.io/name: kitchen
+    app.kubernetes.io/part-of: oms
+    prometheus: platform
+spec:
+  selector:
+    matchLabels:
+      app: kitchen
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scheme: http

@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock
+  namespace: oms
+  labels:
+    app: stock
+    component: backend-service
+    app.kubernetes.io/name: stock
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock
+  template:
+    metadata:
+      labels:
+        app: stock
+        component: backend-service
+    spec:
+      serviceAccountName: stock
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: stock
+        image: ghcr.io/tim275/oms-stock:v1.0.0
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        ports:
+        - containerPort: 9003
+          name: grpc
+          protocol: TCP
+        - containerPort: 8083
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "stock"
+        - name: GRPC_ADDR
+          value: "0.0.0.0:9003"
+        - name: SERVICE_ADDR
+          value: "stock.oms.svc.cluster.local:9003"
+        - name: HTTP_ADDR
+          value: "0.0.0.0:8083"
+        - name: CONSUL_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: CONSUL_ADDR
+        # PostgreSQL - Enterprise Pattern: CloudNativePG operator secret + service discovery
+        - name: POSTGRES_HOST
+          value: "postgres-rw.oms.svc.cluster.local"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-app-user
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-app-user
+              key: password
+        - name: POSTGRES_DB
+          value: "stock"
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
+        - name: RABBITMQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
+        - name: RABBITMQ_PASS
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
+        - name: RABBITMQ_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
+        - name: RABBITMQ_PORT
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
+        - name: REDIS_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: REDIS_ADDR
+        # RABBITMQ_URL and POSTGRES_URI removed - using individual env vars from operator secrets
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

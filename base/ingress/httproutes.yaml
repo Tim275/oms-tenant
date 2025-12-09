@@ -1,0 +1,75 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: customer-app
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: customer-app
+    app.kubernetes.io/part-of: oms
+spec:
+  parentRefs:
+  - name: envoy-gateway
+    namespace: gateway
+  hostnames:
+  - "oms.timourhomelab.org"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: customer-app
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: gateway-api
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/part-of: oms
+spec:
+  parentRefs:
+  - name: envoy-gateway
+    namespace: gateway
+  hostnames:
+  - "oms-api.timourhomelab.org"
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /webhook
+    backendRefs:
+    - name: payments
+      port: 8082
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: gateway
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kitchen-display
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: kitchen-display
+    app.kubernetes.io/part-of: oms
+spec:
+  parentRefs:
+  - name: envoy-gateway
+    namespace: gateway
+  hostnames:
+  - "oms-kitchen.timourhomelab.org"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: kitchen-display
+      port: 80

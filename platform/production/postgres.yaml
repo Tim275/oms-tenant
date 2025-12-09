@@ -1,0 +1,131 @@
+# =============================================================================
+# 🐘 CloudNativePG Cluster - Enterprise Best Practice
+# =============================================================================
+# CloudNative PostgreSQL with:
+# - Auto-Failover (even with 1 replica for homelab)
+# - Continuous WAL archiving (optional)
+# - Application-owned schema (no init.sql needed)
+# - Automatic backups to S3/Ceph (optional)
+#
+# The stock service runs auto-migrations at startup (CloudNative pattern)
+# =============================================================================
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-superuser
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: database
+    platform.homelab/tenant: oms
+type: kubernetes.io/basic-auth
+stringData:
+  username: postgres
+  password: postgres-admin-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-app-user
+  namespace: oms
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: database
+    platform.homelab/tenant: oms
+type: kubernetes.io/basic-auth
+stringData:
+  username: stock
+  password: stock123
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: oms
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: database
+    platform.homelab/tenant: oms
+spec:
+  # 1 instance for homelab (supports up to 3 for HA)
+  instances: 1
+
+  # PostgreSQL version
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+
+  # Primary update strategy
+  primaryUpdateStrategy: unsupervised
+
+  # Superuser secret
+  superuserSecret:
+    name: postgres-superuser
+
+  # Storage configuration
+  storage:
+    storageClass: rook-ceph-block-enterprise
+    size: 5Gi
+
+  # Resource limits for homelab
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # PostgreSQL configuration
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      effective_cache_size: "256MB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "4MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "4MB"
+      min_wal_size: "1GB"
+      max_wal_size: "2GB"
+
+  # Bootstrap configuration - create database and app user
+  bootstrap:
+    initdb:
+      database: stock
+      owner: stock
+      secret:
+        name: postgres-app-user
+      # NO postInitSQL - stock service handles schema via auto-migration
+
+  # Monitoring
+  monitoring:
+    enablePodMonitor: true
+---
+# Service for backwards compatibility (stock service connects to postgres.oms.svc)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: oms
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: database
+    platform.homelab/tenant: oms
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    cnpg.io/cluster: postgres
+    role: primary

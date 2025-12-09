@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kitchen
+  namespace: oms
+  labels:
+    app: kitchen
+    component: consumer-service
+    app.kubernetes.io/name: kitchen
+    app.kubernetes.io/part-of: oms
+    app.kubernetes.io/component: consumer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kitchen
+  template:
+    metadata:
+      labels:
+        app: kitchen
+        component: consumer-service
+    spec:
+      serviceAccountName: kitchen
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: kitchen
+        image: ghcr.io/tim275/oms-kitchen:v1.0.0
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        ports:
+        - containerPort: 8083
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "kitchen"
+        - name: HTTP_ADDR
+          value: "0.0.0.0:8083"
+        - name: SERVICE_ADDR
+          value: "kitchen.oms.svc.cluster.local:8083"
+        - name: CONSUL_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: CONSUL_ADDR
+        # RabbitMQ - Enterprise Pattern: Reference operator-generated secret directly
+        - name: AMQP_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: username
+        - name: AMQP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: password
+        - name: AMQP_HOST
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: host
+        - name: AMQP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-default-user
+              key: port
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"

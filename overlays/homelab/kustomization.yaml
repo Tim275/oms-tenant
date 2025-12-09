@@ -1,0 +1,159 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ===========================================
+# OMS Homelab Overlay - Talos Cluster
+# ===========================================
+# This overlay configures OMS for the homelab environment.
+#
+# Infrastructure is provided by Platform Team:
+# - MongoDB: Percona Operator (mongodb-oms-rs0)
+# - PostgreSQL: StatefulSet (platform/database/postgres-oms)
+# - Redis: StatefulSet (platform/database/redis-oms)
+# - RabbitMQ: RabbitMQ Operator
+# - OTEL: opentelemetry namespace
+# - Jaeger: jaeger namespace
+#
+# Connection details come from Platform-provided:
+# - ConfigMap: oms-infra-config
+# - Secret: oms-infra-secrets
+# ===========================================
+
+namespace: oms
+
+labels:
+  - pairs:
+      environment: homelab
+      platform.homelab/tenant: oms
+
+resources:
+  - ../../base
+  - oms-infra-config.yaml
+  - oms-infra-secrets.yaml
+
+# ===========================================
+# PATCHES
+# ===========================================
+# Configure deployments to use Platform-provided secrets
+
+patches:
+  # Gateway - needs OTEL, gRPC endpoints
+  - target:
+      kind: Deployment
+      name: gateway
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - configMapRef:
+              name: oms-infra-config
+          - secretRef:
+              name: oms-infra-secrets
+
+  # Orders - needs MongoDB, RabbitMQ, OTEL
+  # Override MONGO_URI to use oms-infra-config (Percona MongoDB)
+  # Override CONSUL_ADDR to empty (Consul disabled in homelab)
+  - target:
+      kind: Deployment
+      name: orders
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - configMapRef:
+              name: oms-infra-config
+          - secretRef:
+              name: oms-infra-secrets
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4
+        value:
+          name: CONSUL_ADDR
+          value: ""
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5
+        value:
+          name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: oms-infra-secrets
+              key: MONGO_URI
+
+  # Payments - needs RabbitMQ, OTEL
+  # Override CONSUL_ADDR to empty (Consul disabled in homelab)
+  - target:
+      kind: Deployment
+      name: payments
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - configMapRef:
+              name: oms-infra-config
+          - secretRef:
+              name: oms-infra-secrets
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2
+        value:
+          name: CONSUL_ADDR
+          value: ""
+
+  # Stock - needs PostgreSQL, Redis, RabbitMQ, OTEL
+  # Override CONSUL_ADDR to empty (Consul disabled in homelab - using K8s native service discovery)
+  - target:
+      kind: Deployment
+      name: stock
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - configMapRef:
+              name: oms-infra-config
+          - secretRef:
+              name: oms-infra-secrets
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4
+        value:
+          name: CONSUL_ADDR
+          value: ""
+
+  # Kitchen - needs RabbitMQ, OTEL
+  # Override CONSUL_ADDR to empty (Consul disabled in homelab)
+  - target:
+      kind: Deployment
+      name: kitchen
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - configMapRef:
+              name: oms-infra-config
+          - secretRef:
+              name: oms-infra-secrets
+      - op: replace
+        path: /spec/template/spec/containers/0/env/3
+        value:
+          name: CONSUL_ADDR
+          value: ""
+
+# ===========================================
+# IMAGES
+# ===========================================
+# Override image tags from base (v1.0.0) to environment-specific versions
+# Base already has full registry paths: ghcr.io/tim275/oms-*:v1.0.0
+# We only override the tag here - Enterprise Best Practice!
+
+images:
+  - name: ghcr.io/tim275/oms-gateway
+    newTag: v1.0.2
+  - name: ghcr.io/tim275/oms-orders
+    newTag: v1.0.3
+  - name: ghcr.io/tim275/oms-payments
+    newTag: v1.0.7
+  - name: ghcr.io/tim275/oms-stock
+    newTag: v1.0.11
+  - name: ghcr.io/tim275/oms-kitchen
+    newTag: v1.0.7
+  - name: ghcr.io/tim275/oms-customer-app
+    newTag: v1.0.7
+  - name: ghcr.io/tim275/oms-kitchen-display
+    newTag: v1.0.7

@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: oms
+
+resources:
+- ../../base
+- config
+- infrastructure
+- ingress
+- monitoring
+- dev-tools
+
+replicas:
+- name: gateway
+  count: 1
+- name: orders
+  count: 1
+- name: payments
+  count: 1
+- name: stock
+  count: 1
+- name: kitchen
+  count: 1
+- name: customer-app
+  count: 1
+- name: kitchen-display
+  count: 1
+
+images:
+- name: oms-gateway
+  newTag: latest
+- name: oms-orders
+  newTag: latest
+- name: oms-payments
+  newTag: latest
+- name: oms-stock
+  newTag: latest
+- name: oms-kitchen
+  newTag: latest
+- name: oms-customer-app
+  newTag: latest
+- name: oms-kitchen-display
+  newTag: latest
+
+patches:
+- path: config/configmap-patch.yaml
+  target: {kind: ConfigMap, name: oms-config}
+- path: config/payments-env-patch.yaml
+  target: {kind: Deployment, name: payments}
+
+commonLabels:
+  environment: local-k3d
+
+commonAnnotations:
+  deployment.kubernetes.io/environment: "local-k3d"
